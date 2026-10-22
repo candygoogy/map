@@ -261,6 +261,8 @@ async function open(page: Page): Promise<void> {
 }
 
 test('no CSP violations in the console during arrival and three flights', async ({ page }) => {
+  // A hosted CI runner has no GPU: in software WebGL the arrival and three flights take minutes.
+  if (process.env.CI) test.setTimeout(300_000);
   const problems: string[] = [];
   page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
   page.on('console', (m) => void (m.type() === 'error' && problems.push(`console: ${m.text()}`)));
