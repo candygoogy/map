@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "candygoogy-map",
+  // The day this was set up: the newest date this Wrangler's runtime accepts (UTC).
+  "compatibility_date": "2026-10-19",
+  // Static assets only, no Worker script: every request is served from dist/ (the Vite build),
+  // with the headers in public/_headers (copied to dist/_headers by the build).
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "auto-trailing-slash",
+    // A path that matches no file gets a 404 with dist/404.html as its body (built by
+    // vite-plugin-prerender.ts), never the map's index.html, so a missing model can't come back
+    // as the map.
+    "not_found_handling": "404-page",
+  },
+  // No routes yet: the map.candygoogy.dev Custom Domain is added in Task 21
+  // ([{ "pattern": "map.candygoogy.dev", "custom_domain": true }]). Until then the first
+  // deploy is checked on its workers.dev address (Task 20); Task 21 turns that off, as the
+  // main site has it.
+  "workers_dev": true,
+  "preview_urls": false,
+}

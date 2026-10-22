@@ -1,0 +1,91 @@
+name: CI
+
+# Modelled on candygoogy.dev's .github/workflows/ci.yml: every check runs on each push and
+# pull request, and a push to main that passes them all moves the deploy branch, which
+# Workers Builds deploys.
+#
+# Rebuilds for fresh content don't come through here: after each of its own deploys,
+# candygoogy.dev calls this Worker's Workers Builds Deploy Hook, which rebuilds the deploy
+# branch against the live /map.json (hosting notes, "Rebuild on main-site deploy"). The code
+# on deploy has already passed this workflow, so nothing needs re-checking for it.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # Wrangler's usage reports stay off in CI.
+      WRANGLER_SEND_METRICS: "false"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      # The Blender tests skip without BLENDER, and the ones that read the Blender sources
+      # (not in the public repo) without them; everything else runs.
+      - run: npx vitest run
+      # The browser is kept between runs, keyed by Playwright's version; the system
+      # libraries it needs are installed every time.
+      - id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - id: browsers
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - if: steps.browsers.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - if: steps.browsers.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+      # The map on the Vite dev server (playwright.config.ts starts it). Two workers: the
+      # full parallel run timed out loading the models.
+      - run: npx playwright test --project=chromium --workers=2
+      - run: npm run build
+      # The build as the Worker serves it: wrangler.jsonc and public/_headers under
+      # `wrangler dev` (local only, no Cloudflare account), checked by tests/e2e/worker.spec.ts.
+      - name: Worker tests against wrangler dev
+        run: |
+          npx wrangler dev --port 8788 --ip 127.0.0.1 > "$RUNNER_TEMP/wrangler.log" 2>&1 &
+          for _ in $(seq 1 60); do
+            curl -sf -o /dev/null http://127.0.0.1:8788/ && break
+            sleep 1
+          done
+          npx playwright test --project=worker || { cat "$RUNNER_TEMP/wrangler.log"; exit 1; }
+        env:
+          # Set, so Playwright starts no dev server and the worker tests fail (not skip) if
+          # wrangler dev never came up.
+          BASE_URL: http://127.0.0.1:8788
+
+  # Workers Builds deploys the deploy branch, not main, so a push goes live only once every
+  # check above has passed on it. A later push cancels an earlier run, and its own run then
+  # moves the branch past both commits.
+  release:
+    needs: check
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      # A plain push only fast-forwards: if deploy ever holds a commit main doesn't, this
+      # fails instead of overwriting it. The first run creates the branch.
+      - run: git push origin HEAD:refs/heads/deploy

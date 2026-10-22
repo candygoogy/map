@@ -1,0 +1,40 @@
+# deps and builds
+node_modules/
+dist/
+.vite/
+.wrangler/
+
+# tests
+test-results/
+playwright-report/
+blob-report/
+coverage/
+
+# secrets
+.env
+.env.*
+.dev.vars*
+
+# Blender and pipeline intermediates
+*.blend1
+*.blend@
+*.raw.glb
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+__pycache__/
+
+# Kept locally, not in the public repo: the working notes, the renders, the Blender sources and
+# the tools that only make them (the build and the tests run without them)
+plans/
+shots/
+blender/
+typings/
+pyrightconfig.json
+dev/receipt.*
+dev/shots.*
+scripts/record-viewer.mjs
+.claude/

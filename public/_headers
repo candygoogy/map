@@ -1,0 +1,34 @@
+# Cloudflare static assets: response headers by path (wrangler.jsonc serves dist/ with no
+# Worker script, so these apply to every response, the 404 too).
+
+# The year's cache (public, max-age=31536000, immutable) goes on every file under /assets/ (Vite
+# names them by content hash, so one never changes in place) and /models/ (their URLs carry a
+# hash of the file, ?v=), one rule per file: the build
+# appends those to dist/_headers (vite.config.ts, immutableHeaders). Not a /assets/* rule: these
+# rules go by path whatever the status, so a 404 there (a deploy's old chunk, a missing model)
+# would be kept for a year too. Anything else, a 404 included, keeps the default
+# public, max-age=0, must-revalidate.
+
+# The map is reached only through candygoogy.dev's 404 and stays out of search results.
+#
+# The page has no inline script or style (Vite links its bundle and CSS), so the policy is
+# one header for every response, with no hashes:
+#  - script-src: the bundles, plus 'wasm-unsafe-eval' because the meshopt decoder compiles
+#    WebAssembly, which 'self' alone blocks. It decodes on the main thread (no
+#    MeshoptDecoder.useWorkers), so no worker-src: default-src 'none' refuses workers.
+#  - img-src and connect-src blob:: GLTFLoader turns each GLB's embedded bake into a blob:
+#    URL and fetch()es it into an ImageBitmap (connect-src) wherever createImageBitmap
+#    works (Chromium, Firefox 98+, Safari 17+); older browsers load it as an <img>
+#    (img-src). data: is for three.js's own data: images.
+#  - connect-src 'self': the models and the camera clips (world.glb). The feed is read at
+#    build time only, never by the page.
+#  - fonts and styles are self-hosted under /assets/.
+# Everything else falls to default-src 'none'. As on candygoogy.dev: no framing, no other
+# site's window, no sniffing, and the same Permissions-Policy.
+/*
+  X-Robots-Tag: noindex
+  Content-Security-Policy: default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' blob: data:; font-src 'self'; connect-src 'self' blob:; frame-ancestors 'none'; base-uri 'none'; form-action 'none';
+  Cross-Origin-Opener-Policy: same-origin
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()

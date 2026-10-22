@@ -1,0 +1,1815 @@
+/*
+ * The map's page. Without 3D (html.no-3d: no JS, no WebGL2, or the stage
+ * failed) #stations is a readable page in candygoogy.dev's language: zinc
+ * neutrals, one accent for links and focus, Newsreader headings,
+ * Schibsted Grotesk text, hairlines between rows and dotted leaders in the
+ * facts. The 3D layout (html.has-3d) builds on this from Task 5.
+ * Every text pair passes AA in both themes; focus rings are 3:1 or more.
+ */
+
+@font-face {
+  font-family: "Newsreader";
+  src: url("./fonts/Newsreader-Display.woff2") format("woff2");
+  font-weight: 500 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Schibsted Grotesk";
+  src: url("./fonts/SchibstedGrotesk.woff2") format("woff2");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Until the two faces arrive (font-display: swap), the text is set in a local face sized to
+   match them, so the swap moves nothing (no layout shift): size-adjust matches the average
+   advance over the page's own words (the feed's text; the headings for Newsreader, at the
+   headings' weight), and the overrides give the web face's ascent and descent (its typo
+   metrics; no line gap). Measured from the woff2 files against Windows' Georgia and Arial
+   with fontTools. Where the local face is missing, the stack goes on to the old fallbacks. */
+@font-face {
+  font-family: "Newsreader Fallback";
+  src: local("Georgia Bold"), local("Georgia-Bold");
+  font-weight: 500 700;
+  size-adjust: 87.89%;
+  ascent-override: 83.63%;
+  descent-override: 30.15%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Schibsted Grotesk Fallback";
+  src: local("Arial"), local("ArialMT");
+  font-weight: 100 599;
+  size-adjust: 104.27%;
+  ascent-override: 93.65%;
+  descent-override: 24.72%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Schibsted Grotesk Fallback";
+  src: local("Arial Bold"), local("Arial-BoldMT");
+  font-weight: 600 900;
+  size-adjust: 105.1%;
+  ascent-override: 92.92%;
+  descent-override: 24.53%;
+  line-gap-override: 0%;
+}
+
+:root {
+  color-scheme: light;
+
+  /* Theme (Global Constraints). The scene reads these too. */
+  --bg: #f4f4f5;
+  --ink: #18181b;
+  --soft: #52525b;
+  --line: #d9d9dc;
+  --edge: #a1a1aa;
+  --faint: #d4d4d8;
+  --ghost: #e4e4e6; /* a switched-off link (the power switch): halfway from --faint to --bg */
+  --acc: #3651d4;
+  --model: #e4e4e7;
+  --detail: #3f3f46;
+  --shadow: #18181b;
+  --paper: #fafafa; /* both themes: receipt paper is white (owner, 2026-10-18) */
+  --lamp: #27272a; /* both themes: a light that is out, dark so a lit one (--paper) shows on it */
+
+  --focus: var(--acc);
+  --selection: #d7ddfb;
+  --mark-mix: 12%;
+
+  /* The theme switch, as candygoogy.dev's (its tokens.css). */
+  --switch-track: #e4e4e7;
+  --switch-on-bg: #18181b;
+  --switch-on-ink: #f4f4f5;
+
+  /* Type, space and layout: candygoogy.dev's tokens. */
+  --ff-display: "Newsreader", "Newsreader Fallback", Georgia, serif;
+  --ff-text: "Schibsted Grotesk", "Schibsted Grotesk Fallback", system-ui, sans-serif;
+  --fs-xs: 0.8125rem; /* 13px: the theme switch */
+  --fs-sm: 0.875rem;
+  --fs-meta: 0.9375rem;
+  --fs-body: 1.0625rem;
+  --fs-lede: 1.25rem;
+  --fs-d-section: clamp(2rem, 1.25rem + 2.4vw, 3rem);
+  --fs-d-hero: clamp(2.6rem, 1.4rem + 4.6vw, 5.4rem);
+  --lh-body: 1.6;
+  --lh-tight: 1.1;
+  --lh-display: 0.98;
+  --ls-section: -0.01em;
+  --ls-hero: -0.018em;
+  --ls-wordmark: -0.02em;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-heavy: 800;
+  --fw-d-bold: 650;
+  --measure: 58ch;
+  --measure-lede: 46ch;
+
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --sp-8: 4rem;
+  --sp-9: 6rem;
+
+  --page-max: 84rem;
+  --gutter: clamp(1.25rem, 5vw, 4.5rem);
+  --gap-hero: clamp(2.5rem, 7vw, 7.5rem);
+  --space-hero-top: clamp(3rem, min(14vh, 12vw), 10.5rem);
+
+  --rule: 1px;
+  --focus-width: 2px;
+  --focus-offset: 4px;
+  --r-focus: 2px;
+  --r-pill: 999px;
+  --ease-ui: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-ui: 200ms;
+}
+
+/* Dark: Auto with a dark OS, or Dark chosen in the header's switch (html[data-theme], set by
+   boot.ts before the paint and by src/theme-switch.ts). Light chosen on a dark OS is the :root
+   block above. Two identical lists, as on candygoogy.dev (light-dark() would hand the scene's
+   reader an unresolved value); tests/unit/theme-switch.test.ts fails if they drift apart. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --bg: #121214;
+    --ink: #f4f4f5;
+    --soft: #a1a1aa;
+    --line: #2e2e32;
+    --edge: #52525b;
+    --faint: #2e2e33;
+    --ghost: #202023;
+    --acc: #8ea2ff;
+    --model: #46464d; /* was #2a2a2f: too close to --bg for models that are mostly body (cp4-dark) */
+    --detail: #d4d4d8;
+    --shadow: #000000;
+
+    --selection: #2c3566;
+    --mark-mix: 18%;
+    --switch-track: #27272a;
+    --switch-on-bg: #f4f4f5;
+    --switch-on-ink: #121214;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121214;
+  --ink: #f4f4f5;
+  --soft: #a1a1aa;
+  --line: #2e2e32;
+  --edge: #52525b;
+  --faint: #2e2e33;
+  --ghost: #202023;
+  --acc: #8ea2ff;
+  --model: #46464d;
+  --detail: #d4d4d8;
+  --shadow: #000000;
+
+  --selection: #2c3566;
+  --mark-mix: 18%;
+  --switch-track: #27272a;
+  --switch-on-bg: #f4f4f5;
+  --switch-on-ink: #121214;
+}
+
+/* Base */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--ff-text);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-family: var(--ff-display);
+  font-weight: var(--fw-d-bold);
+  line-height: var(--lh-tight);
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+::selection {
+  background: var(--selection);
+}
+
+/* Links: the accent, always underlined (colour is never the only cue). On
+   hover or keyboard focus a soft accent marker fills in behind the text,
+   padded out and pulled back by the same margin so nothing moves. */
+a {
+  --mark: color-mix(in oklab, var(--acc) var(--mark-mix), transparent);
+  margin-inline: -0.2em;
+  padding-inline: 0.2em;
+  border-radius: 0.3em;
+  color: var(--acc);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  transition: background-color var(--dur-ui) var(--ease-ui);
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: var(--mark);
+  }
+}
+
+a:focus-visible {
+  background-color: var(--mark);
+}
+
+/* One focus style everywhere: a 2px ring in the accent (5.82:1 on the
+   light page, 7.4:1 on the dark one). */
+:focus-visible {
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--r-focus);
+}
+
+/* Every link gets a touch target at least 44px tall and wide, laid over
+   its line without changing it. Lists of links are spaced so the targets
+   never overlap (a short link like "X" reaches 14.5px into its 24px gap). */
+.top a,
+.station a {
+  position: relative;
+}
+
+.top a::after,
+.station a::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, 44px);
+  height: 44px;
+  translate: -50% -50%;
+}
+
+/* Header: the wordmark, and the way back. */
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3) var(--sp-6);
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding: var(--sp-6) var(--gutter) 0;
+}
+
+.mark {
+  font-family: var(--ff-text);
+  font-size: 1.125rem;
+  font-weight: var(--fw-heavy);
+  letter-spacing: var(--ls-wordmark);
+  line-height: var(--lh-body);
+}
+
+.mark .soft {
+  font-weight: var(--fw-regular);
+  letter-spacing: normal;
+  color: var(--soft);
+}
+
+.back {
+  font-size: var(--fs-meta);
+}
+
+/* A quiet line under the header saying this is the plain version. It's
+   only true while 3D isn't running, so it never shows under has-3d. */
+.plain-note {
+  flex-basis: 100%;
+  font-size: var(--fs-meta);
+  color: var(--soft);
+}
+
+.has-3d .plain-note {
+  display: none;
+}
+
+/* The theme switch (src/theme-switch.ts), candygoogy.dev's ThemeSwitch: Auto / Light / Dark in
+   a pill track. Without JS there's nothing to switch (Auto still follows the OS), so it shows
+   only under html.js, which boot.ts sets before the first paint: no layout shift. On the plain
+   page it sits before the way back; on narrow screens it takes a row of its own, under the way
+   back. In 3D: on the panel's column on desktop, in the overview only on phones (below). */
+.theme-row {
+  display: none;
+  margin-inline-start: auto;
+}
+
+.js .theme-row {
+  display: block;
+}
+
+@media (width < 900px) {
+  .js .theme-row {
+    display: flex;
+    flex-basis: 100%;
+    justify-content: flex-end;
+    order: 1;
+  }
+
+  .plain-note {
+    order: 2;
+  }
+}
+
+/* Wide enough for the header row (a landscape phone, a tablet): before the way back, as on a
+   desktop's plain page, its margins pulled in so the row is no taller than the wordmark's line
+   and the labels below keep their room. */
+@media (600px <= width < 900px) {
+  .js .theme-row {
+    display: block;
+    flex-basis: auto;
+    order: 0;
+    align-self: center;
+    margin-block: calc((1.125rem * 1.6 - 2rem - 6px) / 2);
+  }
+}
+
+.themes {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 3px;
+  border-radius: var(--r-pill);
+  background: var(--switch-track);
+  /* Where the pill is: 0, 1 or 2 (a third of the inner track each). */
+  --at: 0;
+}
+
+/* At first paint the pill sits on the saved theme (boot.ts); once the script has synced,
+   data-current leads, since a click moves the pill before the theme changes. */
+html[data-theme="light"] .themes:not([data-current]),
+.themes[data-current="light"] {
+  --at: 1;
+}
+
+html[data-theme="dark"] .themes:not([data-current]),
+.themes[data-current="dark"] {
+  --at: 2;
+}
+
+/* Nothing slides until the script has synced (data-ready, a frame later). */
+.themes:not([data-ready]) :is(.pill, .ink),
+html.theme-restore .themes :is(.pill, .ink) {
+  transition: none;
+}
+
+.themes .pill {
+  position: absolute;
+  inset: 3px auto 3px 3px;
+  width: calc((100% - 6px) / 3);
+  border-radius: var(--r-pill);
+  background: var(--switch-on-bg);
+  transform: translateX(calc(var(--at) * 100%));
+  transition: transform 220ms var(--ease-in-out);
+}
+
+.themes button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0 var(--sp-3);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--soft);
+  font: var(--fw-medium) var(--fs-xs) / 1 var(--ff-text);
+  cursor: pointer;
+  transition: color var(--dur-ui) var(--ease-ui);
+}
+
+/* The visible pill stays 32px; the touch target is 44px tall. */
+.themes button::after {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .themes button:hover {
+    color: var(--ink);
+  }
+}
+
+.themes button:focus-visible {
+  outline-offset: 2px;
+  border-radius: var(--r-pill);
+}
+
+/* The pressed colour's copy of the labels, clipped to the pill's rectangle and sliding with it,
+   so text never vanishes mid-slide. */
+.themes .ink {
+  position: absolute;
+  inset: 3px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  pointer-events: none;
+  color: var(--switch-on-ink);
+  font: var(--fw-medium) var(--fs-xs) / 1 var(--ff-text);
+  clip-path: inset(0 calc(100% - (var(--at) + 1) * 100% / 3) 0 calc(var(--at) * 100% / 3) round var(--r-pill));
+  transition: clip-path 220ms var(--ease-in-out);
+}
+
+.themes .face {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.themes .ink .face {
+  justify-content: center;
+  padding: 0 var(--sp-3);
+}
+
+/* A visual copy only (the buttons are the real labels), drawn as generated content. */
+.themes .ink .face::before {
+  content: attr(data-label);
+}
+
+/* Auto's hint: a sun or a moon for what it resolves to. */
+.themes .resolved {
+  width: 12px;
+  height: 12px;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round'%3E%3Ccircle cx='8' cy='8' r='3' fill='black' stroke='none'/%3E%3Cpath d='M8 1.5v1.6M8 12.9v1.6M1.5 8h1.6M12.9 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+
+@media (prefers-color-scheme: dark) {
+  .themes .resolved {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M13 9.6A5.5 5.5 0 1 1 6.4 3a4.3 4.3 0 0 0 6.6 6.6Z' fill='none' stroke='black' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+}
+
+/* Auto's "(light)" / "(dark)": in its name, not on screen. The welcome's
+   counter says itself the same way (src/fallback/html.ts). */
+.themes .vh,
+.welcome .vh {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Forced colours (Windows Contrast themes) drop the fills and plate every label, so the switch
+   keeps its own drawing in system colours: a hairline track, the pill as the selected item. */
+@media (forced-colors: active) {
+  .themes {
+    forced-color-adjust: none;
+    background: Canvas;
+    outline: var(--rule) solid CanvasText;
+    outline-offset: calc(-1 * var(--rule));
+  }
+
+  .themes button,
+  .themes button:hover {
+    color: CanvasText;
+  }
+
+  .themes button:focus-visible {
+    outline-color: CanvasText;
+  }
+
+  .themes .pill {
+    background: Highlight;
+  }
+
+  .themes .ink {
+    color: HighlightText;
+  }
+
+  .themes .resolved {
+    background: CanvasText;
+  }
+
+  .themes .ink .resolved {
+    background: HighlightText;
+  }
+}
+
+/* While the new theme is captured, every CSS transition is off, so the snapshot is the final
+   theme, not a frame of a colour fade (the label and panel fades); the pill and its clipped
+   labels only move, so they finish their slide. */
+html.theme-switching *:not(.themes :is(.pill, .ink)),
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
+}
+
+/* The blind: the new theme comes down from the top with a 48px feathered edge over the old
+   one, which holds still (no mid-grey crossfade). Under reduced motion there's no View
+   Transition at all (src/theme-switch.ts); the rule below is a second guard. */
+html.theme-vt::view-transition-old(root) {
+  animation: none;
+}
+
+html.theme-vt::view-transition-new(root) {
+  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 48px), transparent 100%);
+  mask-size: 100% calc(100svh + 48px);
+  mask-repeat: no-repeat;
+  animation: theme-wipe 400ms var(--ease-in-out) both;
+}
+
+@keyframes theme-wipe {
+  from {
+    mask-position: 0 calc(-100svh - 48px);
+  }
+  to {
+    mask-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .themes :is(.pill, .ink) {
+    transition: none;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* The stations, as a readable page. */
+
+#stations {
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding: 0 var(--gutter) var(--sp-9);
+}
+
+/* Every station but the first is a row: its name on the left, its words on
+   the right (the site's 4:7 project rows), a hairline between rows. */
+.station {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+  column-gap: var(--gap-hero);
+  row-gap: var(--sp-4);
+  align-items: baseline;
+  padding-block: var(--sp-7);
+  scroll-margin-top: var(--sp-5);
+}
+
+.station + .station {
+  border-top: var(--rule) solid var(--line);
+}
+
+.station h2 {
+  font-size: var(--fs-d-section);
+  letter-spacing: var(--ls-section);
+}
+
+.blurb {
+  margin-top: var(--sp-2);
+  max-width: 32ch;
+  font-size: var(--fs-meta);
+  color: var(--soft);
+}
+
+.body {
+  display: grid;
+  gap: var(--sp-5);
+  justify-items: start;
+}
+
+.summary {
+  max-width: var(--measure);
+}
+
+/* The first station, the site itself, opens the page the way the site's
+   hero does: its name large, the headline as the lede. */
+.station[data-kind="origin"] {
+  display: block;
+  padding: var(--space-hero-top) 0 var(--sp-9);
+}
+
+.station[data-kind="origin"] + .station {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.station[data-kind="origin"] h2 {
+  font-size: var(--fs-d-hero);
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-hero);
+}
+
+.station[data-kind="origin"] .blurb {
+  max-width: var(--measure-lede);
+  margin-top: var(--sp-5);
+  font-size: var(--fs-lede);
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.station[data-kind="origin"] .body {
+  margin-top: var(--sp-4);
+}
+
+.station[data-kind="origin"] .summary {
+  max-width: var(--measure-lede);
+  color: var(--soft);
+}
+
+/* The overview's welcome and the phone's peek hint (src/fallback/html.ts)
+   talk about models to click, so they're only for the 3D map: the plain
+   page opens with the origin's intro. */
+.welcome,
+.peek-hint {
+  display: none;
+}
+
+/* The homelab cluster's devices are stations of their own on the 3D map
+   (src/data/cluster.ts); the plain page lists them once, in the homelab's
+   own device list, as before. */
+.no-3d .station[data-kind="device"] {
+  display: none;
+}
+
+/* Leader lists (facts, homelab devices), one row per line as on a receipt:
+   the label, a quiet dotted leader, and the value flush with one shared
+   right edge. The label's column grows to fill the row, so its leader runs
+   right up to the value. The value's column takes everything the label and
+   a minimum leader leave, so it only wraps when it truly can't fit; then
+   its lines are balanced (never one word left alone on the last: "XT" of
+   the homelab's desktop, checkpoint 4), stay flush right, and the leader
+   meets the first one. As on the
+   site's project pages, the list spans the whole column, so the values end
+   on the page's right edge, and they're set in the body size, a step above
+   their labels. */
+.leaders {
+  display: grid;
+  gap: var(--sp-2);
+  width: 100%;
+  margin: 0;
+  font-size: var(--fs-meta);
+}
+
+.leaders > div {
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr) fit-content(100%);
+  align-items: first baseline;
+}
+
+.leaders dt {
+  display: flex;
+  align-items: baseline;
+  color: var(--soft);
+}
+
+.leaders dt::after {
+  content: "\a0";
+  content: "\a0" / "";
+  flex: 1 0 var(--sp-5);
+  /* --reach: how far a wrapped value's first line starts inside its box
+     (src/ui/leaders.ts, in the panel); the leader runs on to meet it. */
+  margin-inline: var(--sp-3) calc(var(--sp-3) - var(--reach, 0px));
+  line-height: 1;
+  border-bottom: var(--rule) dotted var(--edge);
+  transform: translateY(-0.3em);
+}
+
+.leaders dd {
+  margin: 0;
+  text-align: end;
+  font-size: var(--fs-body);
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+/* A device's detail: a second dd, a soft line under its product across the
+   whole row, so a long detail never widens the value's column and pulls
+   the product away from its leader. */
+.leaders .detail {
+  grid-column: 1 / -1;
+  font-size: var(--fs-meta);
+  font-weight: var(--fw-regular);
+  color: var(--soft);
+}
+
+/* Links sit far enough apart that their 44px targets never meet. */
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-5) var(--sp-5);
+  font-size: var(--fs-meta);
+}
+
+/* The experiments: one link per tool, in two columns where there's room. */
+.tools {
+  display: grid;
+  /* A grid item of the section's body: min-width 0 lets it keep to the body's width, and min()
+     keeps one column inside it (a 390px phone scrolled sideways by two 11rem columns). */
+  grid-template-columns: repeat(auto-fill, minmax(min(11rem, 100%), 1fr));
+  gap: var(--sp-5) var(--sp-6);
+  width: 100%;
+  min-width: 0;
+  max-width: 34rem;
+}
+
+/* The 3D layout (html.has-3d, set by boot.ts before the first paint, so
+   nothing here shifts). The canvas fills the viewport behind everything;
+   it's decorative (aria-hidden). Over it: the header across the top, a
+   label beside every model, and the panel: the current station's own
+   section (src/ui/panel.ts), in a column on the right or a sheet at the
+   bottom. The panel covers exactly the inset the camera is framed around
+   (src/stage/stage.ts): panel.ts sets the sizes below from src/tuning.ts,
+   and the breakpoint is tuning.panelMinViewportPx (900px), which
+   panel.spec checks against the stage. In 3D the header and travel run
+   the full width, so they end on the panel's right edge, as its text
+   does. */
+
+#stage {
+  display: none;
+}
+
+.has-3d #stage {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+#stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Dragging a model on a phone moves the model, not the page (src/input/pointer.ts). */
+  touch-action: none;
+}
+
+.has-3d .top {
+  position: relative;
+  z-index: 2;
+  max-width: none;
+  pointer-events: none;
+}
+
+.has-3d .top a,
+.has-3d .themes,
+.has-3d .sound {
+  pointer-events: auto;
+}
+
+/* The theme switch in 3D. Desktop: on the panel's column, its left edge on the panel heading's,
+   centred on the header's line, "Back to the site" still at the right edge. Phone: its own row
+   under the way back (in the header's row from 600px), in the overview only (while the peek's
+   hint shows): at a station it would crowd the docked gondola, and the overview is one ‹ or
+   Escape away (option A). */
+@media (width >= 900px) {
+  .has-3d .theme-row {
+    position: absolute;
+    top: calc(var(--sp-6) + (1.125rem * 1.6 - 2rem - 6px) / 2);
+    left: calc(100% - var(--panel-w) + var(--rule) + var(--sp-7));
+  }
+}
+
+@media (width < 900px) {
+  .js.has-3d:has(.peek-hint.sr-only) .theme-row {
+    display: none;
+  }
+
+  .has-3d .theme-row {
+    animation: theme-row-in var(--dur-ui) var(--ease-ui);
+  }
+}
+
+@keyframes theme-row-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The sound toggle (Task 17, src/sound-toggle.ts): a 44×44 speaker, in 3D only (the plain page
+   makes no sound). Waves when on, crossed out when off. Desktop: on the map side, at the header's
+   right end, beside the panel's rule, centred on the pill's line. Phone: in the pill's row (and
+   gone with it at a station), to its left; its margins keep the row the pill's height. */
+.sound {
+  display: none;
+}
+
+.has-3d .sound {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--soft);
+  vertical-align: middle;
+  cursor: pointer;
+  transition: color var(--dur-ui) var(--ease-ui);
+}
+
+.sound svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sound[aria-pressed="true"] {
+  color: var(--ink);
+}
+
+.sound[aria-pressed="true"] .cross,
+.sound[aria-pressed="false"] .waves {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sound:hover {
+    color: var(--ink);
+  }
+}
+
+@media (width >= 900px) {
+  .has-3d .sound {
+    position: absolute;
+    top: calc((2rem + 6px - 44px) / 2);
+    right: calc(100% + var(--sp-7) + var(--rule) + var(--sp-2));
+  }
+}
+
+/* The phone's header in one row (the phone pass, header A): the wordmark,
+   then three 44×44 icons, ending on the gutter like the travel row: the sound toggle, the theme
+   as one button showing the current choice (Auto half-filled, Light a sun, Dark a moon; a tap
+   steps to the next, src/theme-switch.ts), and the way back as a house, its words kept as its
+   name. Only the pressed option is shown, so the group still says which is on. 66px tall. */
+@media (width < 900px) {
+  .has-3d .top {
+    flex-wrap: nowrap;
+    align-items: center;
+    column-gap: 0;
+    padding-top: calc(var(--sp-6) - 10px);
+  }
+
+  .has-3d .top .mark {
+    margin-inline-end: auto;
+  }
+
+  .js.has-3d .theme-row {
+    display: flex;
+    flex-basis: auto;
+    order: 0;
+    align-items: center;
+    align-self: auto;
+    margin: 0;
+  }
+
+  .js.has-3d:has(.peek-hint.sr-only) .theme-row {
+    display: none;
+  }
+
+  .has-3d .sound {
+    margin: 0;
+  }
+
+  .has-3d .themes {
+    display: block;
+    padding: 0;
+    background: none;
+  }
+
+  .has-3d .themes :is(.pill, .ink),
+  .has-3d .themes .resolved {
+    display: none;
+  }
+
+  .has-3d .themes button {
+    display: none;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    color: var(--ink);
+  }
+
+  .has-3d .themes button[aria-pressed="true"] {
+    display: grid;
+    place-items: center;
+  }
+
+  .has-3d .themes button::after {
+    inset: 0;
+  }
+
+  .has-3d .themes .face {
+    font-size: 0;
+    gap: 0;
+  }
+
+  .has-3d .themes .face::before,
+  .has-3d .top .back::before {
+    content: "";
+    width: 20px;
+    height: 20px;
+    background: currentColor;
+    mask: var(--icon) center / contain no-repeat;
+  }
+
+  .has-3d .themes button[data-value="auto"] {
+    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='1.6'%3E%3Ccircle cx='10' cy='10' r='7.2'/%3E%3Cpath d='M10 2.8a7.2 7.2 0 0 0 0 14.4z' fill='black' stroke='none'/%3E%3C/svg%3E");
+  }
+
+  .has-3d .themes button[data-value="light"] {
+    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.4' stroke-linecap='round'%3E%3Ccircle cx='8' cy='8' r='3' fill='black' stroke='none'/%3E%3Cpath d='M8 1.5v1.6M8 12.9v1.6M1.5 8h1.6M12.9 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1'/%3E%3C/svg%3E");
+  }
+
+  .has-3d .themes button[data-value="dark"] {
+    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M15.8 12.6A7 7 0 0 1 7.4 4.2a7 7 0 1 0 8.4 8.4z' fill='black'/%3E%3C/svg%3E");
+  }
+
+  .has-3d .top .back {
+    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='1.6' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath d='M3 9.2 10 3l7 6.2M5 7.6V17h3.8v-4.6h2.4V17H15V7.6'/%3E%3C/svg%3E");
+    display: inline-flex;
+    flex: none;
+    order: 2;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-inline-end: -12px;
+    font-size: 0;
+    color: var(--ink);
+  }
+
+  /* A tap marks the round icon as ‹ › mark theirs, not with the system's square blue flash
+     (polish-2). */
+  .has-3d :is(.sound, .themes button, .top .back) {
+    border-radius: var(--r-pill);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .has-3d :is(.sound, .themes button, .top .back):active {
+    background-color: color-mix(in oklab, var(--acc) var(--mark-mix), transparent);
+  }
+}
+
+/* A scrim under the header: the floor's colour behind the wordmark and the
+   way back, fading out below them, so a model passing under the header
+   never runs through its words (as a map keeps its chrome readable). It
+   stops at the panel's edge on desktop, whose own background is the same
+   colour, so the panel's rule isn't cut. Decorative, and never in the
+   pointer's way. */
+.has-3d .top::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: calc(100% + var(--sp-5));
+  background: linear-gradient(to bottom, var(--bg) calc(100% - var(--sp-5) - var(--sp-2)), transparent);
+  pointer-events: none;
+}
+
+@media (width >= 900px) {
+  .has-3d .top::before {
+    right: 460px; /* tuning.panelWidthPx, as #stations' --panel-w */
+  }
+}
+
+/* The panel. Its padding is named, so a station shown on focus (below)
+   can take exactly the same box. The header sits in its top padding and
+   the travel controls in its bottom one. The geometry is tuning's, from
+   panel.ts on the root (these are its values, for the first paint). */
+.has-3d {
+  --panel-w: 460px;
+  --sheet-h: 45%;
+  --sheet-peek: 10%; /* of the screen's height: tuning.sheetPeek */
+  --sheet-peek-shift: 0.777778; /* of the sheet's: 1 - sheetPeek / sheetOpen */
+  --sheet-ms: 450ms;
+}
+
+/* A landscape phone keeps the taller peek (tuning.sheetPeekWide): 10% of 390 px is shorter than
+   the travel row. */
+@media (orientation: landscape) {
+  .has-3d {
+    --sheet-peek: 15%;
+    --sheet-peek-shift: 0.666667;
+  }
+}
+
+.has-3d #stations {
+  --pad-bottom: calc(44px + var(--sp-5) + var(--sp-2));
+  position: fixed;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: none;
+  margin: 0;
+  padding: var(--pad-top) var(--pad-end) var(--pad-bottom) var(--pad-start);
+  background: var(--bg);
+}
+
+@media (width >= 900px) {
+  .has-3d #stations {
+    --pad-top: calc(var(--sp-6) + 1.125rem * 1.6 + var(--sp-7)); /* the header, then room */
+    --pad-end: var(--gutter);
+    --pad-start: var(--sp-7);
+    inset: 0 0 0 auto;
+    width: var(--panel-w);
+    border-inline-start: var(--rule) solid var(--line);
+  }
+}
+
+/* Phones: a sheet, open at a station and at its peek in the overview. It
+   moves with the camera's inset: the same time, and the in-out cubic the
+   stage eases it with. */
+@media (width < 900px) {
+  .has-3d #stations {
+    --pad-top: var(--sp-5);
+    --pad-end: var(--gutter);
+    --pad-start: var(--gutter);
+    inset: auto 0 0;
+    height: var(--sheet-h);
+    border-block-start: var(--rule) solid var(--line);
+    transition: transform var(--sheet-ms) cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .has-3d #stations[data-sheet="peek"],
+  .has-3d #stations:not([data-panel]):not(:has(.station:target)) {
+    transform: translateY(calc(var(--sheet-peek-shift) * 100%));
+  }
+
+  /* Station to station the sheet peeks for the ride with the station
+     just left in it: its text fades with the sheet's move, so the peek
+     shows only ‹ › and the counter (already the new station's) and no
+     line runs under them. Opacity only: still read, still where it was
+     for a screen reader, focus left alone. */
+  .has-3d #stations[data-panel] .station > * {
+    transition: opacity var(--sheet-ms) cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .has-3d #stations[data-sheet="peek"] .station > * {
+    opacity: 0;
+  }
+}
+
+/* A landscape phone's open sheet is 45% of a short screen (175px of 390): above the travel row
+   that left a station 60–85px, its name and a line (polish-2). There the station runs down
+   beside the row instead, its text keeping clear of the counter and ‹ ›, which the row's own
+   foot lines up with. */
+@media (width < 900px) and (orientation: landscape) {
+  .has-3d #stations {
+    --pad-bottom: var(--sp-5);
+  }
+
+  .has-3d #stations .station {
+    padding-inline-end: calc(var(--sp-3) + 88px + 6rem + var(--sp-2));
+  }
+}
+
+/* A station in the panel: one column, scrolling inside the panel (never
+   the page) when it's longer. The scroll box reaches a little past the
+   text on each side, so focus rings and link markers aren't clipped. The
+   overview's welcome takes the same box. */
+.has-3d :is(.station, .welcome) {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0 calc(-1 * var(--sp-3));
+  padding: 0 var(--sp-3) var(--sp-3);
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--edge) transparent;
+  border: 0;
+}
+
+/* A hidden node's section (Task 17, the duck) stays out of the page
+   until it's found. */
+.has-3d .station[hidden] {
+  display: none;
+}
+
+/* While there's more below, the station fades out at the panel's foot,
+   so no line is ever cut through; the fade goes as the end comes into
+   view. Scrolled, its top fades in the same way over its first 2.5rem of
+   scroll, so a line scrolled up under the panel's top edge never leaves
+   a cut glyph's tail behind (polish-2, item 8); unscrolled, the top is as
+   it was. Scroll-driven, where the browser has it (elsewhere, a plain
+   cut). */
+@property --more {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --less {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes panel-less {
+  from {
+    --less: 0px;
+  }
+
+  to {
+    --less: 1.5rem;
+  }
+}
+
+@keyframes panel-more {
+  from,
+  90% {
+    --more: 2.5rem;
+  }
+
+  to {
+    --more: 0px;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  .has-3d :is(.station, .welcome) {
+    mask-image: linear-gradient(to bottom, transparent, #000 var(--less), #000 calc(100% - var(--more)), transparent);
+    animation:
+      panel-more linear both,
+      panel-less linear both;
+    animation-timeline: scroll(self);
+    animation-range: normal, 0 2.5rem;
+  }
+}
+
+.has-3d .station h2 {
+  font-size: 2.5rem;
+  letter-spacing: var(--ls-section);
+}
+
+/* Focus lands on the heading after keyboard travel, for screen readers,
+   and the browser may focus the section itself when the URL names it (a
+   scroll box is focusable). Neither is a control, so neither takes a
+   ring; Tab never stops on them. */
+.has-3d :is(.station, .welcome):focus,
+.has-3d :is(.station, .welcome) h2:focus {
+  outline: none;
+}
+
+/* The one-line description under the name: balanced, so a wrap in the
+   column splits it evenly instead of leaving a short first line. */
+.has-3d .station .blurb {
+  max-width: none;
+  margin-top: var(--sp-2);
+  text-wrap: balance;
+}
+
+.has-3d .station .body {
+  margin-top: var(--sp-5);
+}
+
+/* The origin, the page's intro: the site's name, larger, and its headline
+   as the lede, as on the plain page, sized for the column. */
+.has-3d .station[data-kind="origin"] {
+  padding-top: 0;
+}
+
+.has-3d .station[data-kind="origin"] h2 {
+  font-size: 3rem;
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-hero);
+}
+
+.has-3d .station[data-kind="origin"] .blurb {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-lede);
+}
+
+.has-3d .station[data-kind="origin"] .body {
+  margin-top: var(--sp-5);
+}
+
+/* The power switch from the keyboard (Task 15): a quiet button at the end
+   of the origin's panel, made by map.ts (3D only). A hairline box in the
+   accent, 44px tall, marked like a link on hover. Its live region says
+   the reboot to screen readers and is hidden from the eye. */
+.has-3d .station .power {
+  --mark: color-mix(in oklab, var(--acc) var(--mark-mix), transparent);
+  display: block;
+  min-height: 44px;
+  margin-top: var(--sp-5);
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--edge);
+  border-radius: 0.3em;
+  background: transparent;
+  color: var(--acc);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color var(--dur-ui) var(--ease-ui);
+}
+
+@media (hover: hover) {
+  .has-3d .station .power:hover {
+    background-color: var(--mark);
+  }
+}
+
+.has-3d .station .power:active {
+  background-color: var(--mark);
+}
+
+.power-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (width < 900px) {
+  .has-3d .station h2 {
+    font-size: 1.875rem;
+  }
+
+  .has-3d .station[data-kind="origin"] h2 {
+    font-size: 2.25rem;
+  }
+
+  .has-3d .station[data-kind="origin"] .blurb {
+    font-size: var(--fs-body);
+  }
+}
+
+/* The overview's welcome (the column's, with no station current), set as
+   the origin's intro is: the heading, then what this is as the lede. Then
+   three boxes, a hairline above each as between the plain page's stations:
+   a small heading in the stations' face, then its body in the stations'
+   panel type: leader lists as their facts, a paragraph as their summary,
+   and a list of one-line tips. The heading is a step above the origin's
+   name, and nothing after it is set as large: it's the first paint's
+   Largest Contentful Paint. The longest block below it, What's
+   on it's count, is kept at the meta size and apart from its second
+   sentence (src/fallback/html.ts), so its four lines stay under the
+   heading's area. Taller than the column (at 1440×900 and 1000×800), the
+   welcome scrolls in it, as a long station does. */
+.has-3d .welcome h2 {
+  font-size: 3.2rem;
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-hero);
+}
+
+.has-3d .welcome .lede {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-lede);
+  line-height: 1.45;
+}
+
+.has-3d .welcome .box {
+  margin-top: var(--sp-5);
+  padding-top: var(--sp-4);
+  border-top: var(--rule) solid var(--line);
+}
+
+.has-3d .welcome h3 {
+  margin: 0 0 var(--sp-3);
+  font-family: var(--ff-display);
+  font-size: var(--fs-lede);
+  font-weight: var(--fw-d-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-section);
+}
+
+.has-3d .welcome .summary {
+  font-size: var(--fs-meta);
+  text-wrap: pretty;
+}
+
+.has-3d .welcome .summary + .summary {
+  margin-top: var(--sp-2);
+}
+
+.has-3d .welcome .tips {
+  display: grid;
+  gap: var(--sp-1);
+  font-size: var(--fs-meta);
+  line-height: 1.45;
+}
+
+.has-3d .welcome .found {
+  margin-top: var(--sp-3);
+}
+
+/* One set of controls: the mouse set where the main pointer hovers and is
+   fine, the touch set everywhere else. The other set is gone (display:
+   none), so a screen reader reads only the one shown. */
+@media (hover: hover) and (pointer: fine) {
+  .welcome .for-touch {
+    display: none;
+  }
+}
+
+@media not all and (hover: hover) and (pointer: fine) {
+  .welcome .for-mouse {
+    display: none;
+  }
+}
+
+/* The phone's peek in the overview: the welcome's short form, on the
+   travel controls' row (its foot on theirs: the sheet's bottom is
+   --sheet-peek-shift of its height below the screen's; its own 100% is
+   the box inside the top rule), beside ‹ ›. It's only for phones: on the
+   column it stays display:none (it's aria-hidden). */
+@media (width < 900px) {
+  .has-3d .peek-hint {
+    position: absolute;
+    left: var(--pad-start);
+    right: calc(var(--pad-end) + 88px + var(--sp-4));
+    bottom: calc(
+      var(--sheet-peek-shift) * (100% + var(--rule)) +
+        min(var(--sp-5), ((1 - var(--sheet-peek-shift)) * (100% + var(--rule)) - var(--rule) - 44px) / 2)
+    );
+    /* Its sentences (a span each) share a line where they fit, else stack
+       whole, never broken inside one; the gap is a word space. Centred on
+       the row's 44px. */
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    column-gap: 0.28em;
+    min-height: 44px;
+    font-size: var(--fs-meta);
+    line-height: 1.4;
+    color: var(--soft);
+    transition: opacity var(--sheet-ms) cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  /* Its row leaves room for ‹ › only: once the counter reads a station
+     (at once, as a flight leaves the overview), the hint fades so it never
+     runs under the number. Opacity only: still read until panel.ts swaps
+     in the station's text. */
+  .has-3d:has(.travel .count:not(:empty)) .peek-hint {
+    opacity: 0;
+    /* Quickly, and the number comes in just after it's gone: over the sheet's 450ms in-out the
+       hint's second line still stood at full strength under "1 of 17" for 300ms at 360px
+       (polish-2). It comes back at the sheet's pace. */
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-ui);
+  }
+
+  .has-3d .travel .count {
+    transition: opacity 150ms var(--ease-ui) 120ms;
+  }
+
+  .has-3d .travel .count:empty {
+    opacity: 0;
+  }
+}
+
+/* Every pane but the one shown: visually hidden, still read by screen
+   readers (panel.ts gives them .sr-only; never hidden or display:none).
+   Before panel.ts runs, the URL's station shows, or with none the
+   column's welcome and the phone's hint. */
+.has-3d :is(.station, .welcome, .peek-hint).sr-only,
+.has-3d #stations:not([data-panel]) .station:not(:target),
+.has-3d #stations:not([data-panel]):has(.station:target) :is(.welcome, .peek-hint) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (width < 900px) {
+  .has-3d #stations:not([data-panel]) .welcome {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+/* A hidden station's links leave the Tab order, but a screen reader can
+   still move focus into one: then it shows over the panel, in the same
+   box, so whoever sees the screen sees the link they're on. */
+.has-3d .station.sr-only:focus-within {
+  position: absolute;
+  inset: var(--pad-top) var(--pad-end) var(--pad-bottom) var(--pad-start);
+  z-index: 1;
+  width: auto;
+  height: auto;
+  margin: 0 calc(-1 * var(--sp-3));
+  padding: 0 var(--sp-3) var(--sp-3);
+  overflow: hidden auto;
+  clip-path: none;
+  white-space: normal;
+  background: var(--bg);
+}
+
+/* The stations' navigation (src/ui/labels.ts): ‹ › with the counter, and
+   a label on every node. It lies over the whole screen and lets the
+   pointer through everywhere but its buttons. */
+.stations-nav {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Over the map the labels' targets (and the stray's) are the map's too: a pinch or a drag that
+   starts on one is never the browser's, which zoomed the whole page (header, sheet and all)
+   when a finger of a pinch landed on a label (polish-2). */
+.labels {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.labels li {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Behind the camera, off the canvas or under the panel: out of sight and
+   out of the pointer's way, but still in the Tab order, and shown while
+   focused (labels.ts holds it inside the free part of the canvas). It
+   fades rather than blinks as it crosses an edge in flight; its place
+   still moves every frame (transform). */
+.labels li {
+  transition: opacity var(--label-fade, 120ms) var(--ease-ui);
+}
+
+.labels li[data-off]:not(:focus-within) {
+  opacity: 0;
+}
+
+.labels li[data-off]:not(:focus-within) .label::after,
+.labels li[data-nohit] .label::after {
+  pointer-events: none;
+}
+
+/* A label: the node's name in the text face, small and medium, beside its
+   model. A halo of the floor's colour keeps it clear of the hairlines it
+   crosses, as a map's labels are, and of a model's contact shadow: a
+   stroke of it under the glyphs (paint-order), softened by a glow, so its
+   words keep 4.5:1 wherever it lies (the audit's item 5: 2.4:1 on Siel
+   Eolie's shadow, in light). The glow is a soft pill of the floor's colour
+   behind the words (::before), not a text-shadow: Chrome counts a text's
+   shadow in its Largest Contentful Paint area, and the 0.8em glow tripled a
+   14px name's (candygoogy-bot's 2,320 px² read as 7,644), so on a phone
+   the names the arrival brings in outranked the wordmark painted first and
+   Lighthouse's LCP moved to the arrival's end (1.65 → 22.9 s; the
+   2026-10-22 audit, lcp-fix.md). The button's box hugs the name, so its
+   focus ring does too; its touch target is 44px, laid over it. */
+.label {
+  position: relative;
+  isolation: isolate; /* its glow (z-index: -1) behind its words, over the map */
+  display: block;
+  margin: 0;
+  padding: 0 var(--sp-1);
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: var(--fw-medium) var(--fs-sm) / 1.4 var(--ff-text);
+  text-align: start;
+  white-space: nowrap;
+  -webkit-text-stroke: 0.25em var(--bg);
+  paint-order: stroke fill;
+  cursor: pointer;
+  pointer-events: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The glow round a name and round its status line: a box's paint, so no
+   part of the text's own area (above). Drawn as the three text-shadows
+   (0.25, 0.5 and 0.8em) were, side by side in the fix's crops. */
+.label::before,
+.label .status::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0.2em 0.1em;
+  border-radius: 0.5em;
+  background: var(--bg);
+  box-shadow:
+    0 0 0.25em 0.1em var(--bg),
+    0 0 0.6em var(--bg);
+}
+
+/* The status line has no padding of its own: its glow reaches as far past
+   its words as the name's does past the name. */
+.label .status::before {
+  inset: 0.2em -0.15em;
+}
+
+/* The target alone takes the pointer, and labels.ts (--hit) cuts it back
+   where it would cover another model, so a tap on that model reaches it. */
+.label::after {
+  content: "";
+  position: absolute;
+  inset: var(--hit, calc(50% - 22px) min(0px, calc(50% - 22px)));
+  pointer-events: auto;
+}
+
+.label[aria-current] {
+  color: var(--acc);
+}
+
+/* Its status: a quiet line under the name, on hover and focus, or
+   pinned on through the arrival. */
+.label .status {
+  position: absolute;
+  isolation: isolate;
+  top: 100%;
+  left: var(--sp-1);
+  font-weight: var(--fw-regular);
+  color: var(--soft);
+  opacity: 0;
+  transition: opacity var(--status-fade, 150ms) var(--ease-ui);
+}
+
+@media (hover: hover) {
+  .label:hover .status {
+    opacity: 1;
+  }
+}
+
+.label:focus-visible .status,
+.labels .is-hover .status,
+.labels [data-pinned] .status {
+  opacity: 1;
+}
+
+/* A phone's overview has no room for the labels' words, and gives the
+   network the whole width. On a touch screen in the portrait layout
+   (labels.ts sets data-quiet) a label is hidden from the eye only: still a
+   named button in the Tab order and the accessibility tree, still taking
+   its tap. It shows while focused, while its node is hovered and while
+   it's the current station, in and out as the panel's text swaps. Not for
+   the arrival's diagnostic: on a phone its words overlapped and ran off
+   the screen. */
+.stations-nav[data-quiet] .label,
+.labels li[data-quiet] .label {
+  opacity: 0;
+  transition: opacity var(--label-hide, 140ms) var(--label-ease, ease);
+}
+
+/* The homelab cluster's sub-nodes keep quiet the same way in every
+   overview (labels.ts: data-quiet on their own items), so the fan's five
+   labels don't crowd it. */
+.stations-nav[data-quiet] :is(li:focus-within, li.is-hover) .label,
+.stations-nav[data-quiet] li[data-named] .label,
+.stations-nav[data-quiet] .label[aria-current],
+.labels li[data-quiet]:is(:focus-within, .is-hover) .label,
+.labels li[data-quiet] .label[aria-current] {
+  opacity: 1;
+  transition-duration: var(--label-show, 220ms);
+}
+
+/* The stray signal's button (Task 17, src/moments/duck.ts): a 44px round
+   target over the signal while it rides, drawn as nothing but the signal
+   itself; a focus ring for the keyboard. Off the canvas it lets the
+   pointer through and shows only while focused. */
+.labels li.stray[hidden] {
+  display: none;
+}
+
+/* Over the labels it rides past, so a click on the signal is the signal's. */
+.labels li.stray {
+  z-index: 1;
+}
+
+.stray-hit {
+  display: block;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stray-hit:focus-visible {
+  outline-offset: -8px;
+  border-radius: 50%;
+}
+
+.labels li.stray[data-off]:not(:focus-within) .stray-hit {
+  pointer-events: none;
+}
+
+/* Travel (src/ui/controls.ts, 3D only): the station counter and ‹ ›, in
+   the bottom right corner, on the header's right edge, the way back's
+   counterpart. On desktop that's the foot of the panel's column; on
+   phones, the bottom sheet, peek or open. The 44px buttons carry no
+   chrome, only their glyph, and take the links' accent marker on hover;
+   the last one is pulled out by half its empty width so its glyph, not
+   its box, ends on the edge, but never so far that its focus ring would
+   leave the screen (phones' gutters are narrower). */
+.travel {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 var(--gutter) var(--sp-5);
+  pointer-events: none;
+}
+
+.travel .count {
+  min-width: 8ch; /* "11 of 11": the buttons stay put as the number grows */
+  margin-inline-end: var(--sp-4); /* with the button's own room, about the gap between ‹ and › */
+  text-align: end;
+  font-size: var(--fs-meta);
+  color: var(--soft);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.travel button {
+  --mark: color-mix(in oklab, var(--acc) var(--mark-mix), transparent);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0 0 0.12em; /* the guillemets sit low on the line: centre them by eye */
+  border: 0;
+  border-radius: 0.3em;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-lede);
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background-color var(--dur-ui) var(--ease-ui);
+  -webkit-tap-highlight-color: transparent; /* :active marks the press */
+}
+
+/* Phones: where the peek is short (a landscape phone's is 58px), the row
+   sits in the middle of it, under the sheet's rule, rather than right
+   against it: its foot is the lesser of the usual and the centred one,
+   and it moves with the sheet. The hint above follows it. The open
+   sheet keeps the usual foot. */
+@media (width < 900px) {
+  .travel {
+    bottom: 0;
+    transition: bottom var(--sheet-ms) cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .has-3d:has(#stations[data-sheet="peek"]) .travel {
+    bottom: min(0px, (var(--sheet-peek) - var(--rule) - 44px) / 2 - var(--sp-5));
+  }
+}
+
+.travel button:last-child {
+  margin-inline-end: max(
+    calc((44px - 0.5em) / -2),
+    calc(var(--focus-offset) + var(--focus-width) + var(--sp-1) - var(--gutter))
+  );
+}
+
+@media (hover: hover) {
+  .travel button:hover {
+    background-color: var(--mark);
+  }
+}
+
+.travel button:active {
+  background-color: var(--mark);
+}
+
+/* The skip link after ‹ › (controls.ts): out of sight until it has focus,
+   then a 44px pill just above the row, its right edge on ›'s. None where
+   the shown pane has no heading to go to (the phone's peek). */
+.travel .skip {
+  position: absolute;
+  inset-inline-end: var(--gutter);
+  bottom: calc(100% + var(--sp-1));
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  background: var(--bg);
+  font-size: var(--fs-meta);
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+.travel .skip:not(:focus) {
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.has-3d:has(.peek-hint:not(.sr-only)) .travel .skip {
+  display: none;
+}
+
+/* Two columns stack. */
+@media (max-width: 53.75rem) {
+  .station {
+    grid-template-columns: minmax(0, 1fr);
+    padding-block: var(--sp-6);
+  }
+}
+
+/* Phones: no leader, each value under its label (as on the site). */
+@media (max-width: 32.5rem) {
+  .leaders {
+    gap: var(--sp-3);
+  }
+
+  .leaders > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .leaders dt {
+    display: block;
+  }
+
+  .leaders dt::after {
+    display: none;
+  }
+
+  .leaders dd {
+    text-align: start;
+  }
+}
+
+@media (forced-colors: active) {
+  .leaders dt::after {
+    border-bottom-color: CanvasText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 1ms !important;
+  }
+}

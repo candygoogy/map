@@ -1,0 +1,188 @@
+{
+  "version": 1,
+  "generated": "2026-10-18",
+  "site": {
+    "name": "candygoogy",
+    "url": "https://candygoogy.dev",
+    "headline": "I keep computers running, and build the tools I wish existed.",
+    "line": "I’m an IT technician by day. On my own time I build software and websites, and Fettle is the one I’m proudest of.",
+    "links": [
+      { "label": "GitHub", "href": "https://github.com/candygoogy" },
+      { "label": "X", "href": "https://x.com/candygoogy" },
+      { "label": "Discord", "href": "https://discord.com/users/699600164180066376" },
+      { "label": "Telegram", "href": "https://t.me/candygoogy" },
+      { "label": "hello@candygoogy.dev", "href": "mailto:hello@candygoogy.dev" }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "origin",
+      "kind": "origin",
+      "name": "candygoogy.dev",
+      "blurb": "I keep computers running, and build the tools I wish existed.",
+      "summary": "I’m an IT technician by day. On my own time I build software and websites, and Fettle is the one I’m proudest of.",
+      "links": [
+        { "label": "GitHub", "href": "https://github.com/candygoogy" },
+        { "label": "X", "href": "https://x.com/candygoogy" },
+        { "label": "Discord", "href": "https://discord.com/users/699600164180066376" },
+        { "label": "Telegram", "href": "https://t.me/candygoogy" },
+        { "label": "hello@candygoogy.dev", "href": "mailto:hello@candygoogy.dev" }
+      ],
+      "page": "/"
+    },
+    {
+      "id": "fettle",
+      "kind": "project",
+      "name": "Fettle",
+      "blurb": "Windows check-up, printed as a readable receipt",
+      "summary": "A free, open-source check-up for Windows PCs. It reads what Windows already knows and prints it as a receipt: a plain-words verdict on every line, the next steps at the top, and the numbers underneath for anyone who wants them.",
+      "status": "live",
+      "version": "1.0.5",
+      "runsOn": "Windows 10 and 11 (64-bit)",
+      "license": "MIT",
+      "stack": ["Rust", "Slint", "WebAssembly", "Astro", "Cloudflare Workers"],
+      "links": [
+        { "label": "fettle.page", "href": "https://fettle.page" },
+        { "label": "Source on GitHub", "href": "https://github.com/fettle-page/fettle" }
+      ],
+      "updated": "2026-10-10",
+      "page": "/fettle"
+    },
+    {
+      "id": "idiff",
+      "kind": "project",
+      "name": "Install diff",
+      "blurb": "What an installer did to your PC, in plain words",
+      "summary": "A free, open-source command-line tool for Windows. It tells you, in plain words, what an app’s installer did to your PC and what it left behind after you uninstalled it. It only reads.",
+      "status": "live",
+      "version": "1.0.0",
+      "runsOn": "Windows 10 and 11 (64-bit)",
+      "license": "MIT",
+      "stack": ["Rust"],
+      "links": [
+        { "label": "Source on GitHub", "href": "https://github.com/fettle-page/idiff" }
+      ],
+      "updated": "2026-10-14",
+      "page": "/idiff"
+    },
+    {
+      "id": "notary",
+      "kind": "project",
+      "name": "Notary",
+      "blurb": "Claude Code mods that check Claude’s work",
+      "summary": "Two small mods for Claude Code. Changes keeps a turn-by-turn timeline of what Claude edited, with each file’s diff and a Revert that refuses rather than guesses. Receipts checks Claude’s “all tests pass” against the tests it actually ran.",
+      "status": "live",
+      "license": "MIT",
+      "stack": ["TypeScript"],
+      "links": [
+        { "label": "Source on GitHub", "href": "https://github.com/candygoogy/notary" }
+      ],
+      "updated": "2026-10-13"
+    },
+    {
+      "id": "candygoogy-bot",
+      "kind": "project",
+      "name": "candygoogy-bot",
+      "blurb": "Telegram bot that wakes and shuts down my PCs",
+      "summary": "A Telegram bot that runs on an always-on home server and wakes, sleeps and shuts down the PCs on the same network. Every power action asks first, and the bot reports what actually happened, like “Booted in 45s.” It also keeps an eye on the server itself: disks, services, containers and backups.",
+      "status": "live",
+      "license": "MIT",
+      "stack": ["Python", "Docker", "systemd"],
+      "links": [
+        { "label": "Source on GitHub", "href": "https://github.com/candygoogy/candygoogy-bot" }
+      ],
+      "updated": "2026-10-11"
+    },
+    {
+      "id": "dolci-eoliani",
+      "kind": "project",
+      "name": "Dolci Eoliani",
+      "blurb": "Pastry shop site with WhatsApp ordering",
+      "summary": "An online shop window for an artisan pastry shop. Customers browse the pastries, put an order together and send it on WhatsApp. The site is in Italian, and every page is prerendered so search engines can read it.",
+      "status": "live",
+      "stack": ["React 19", "TypeScript", "Vite", "Tailwind"],
+      "links": [
+        { "label": "dolci-eoliani.it", "href": "https://dolci-eoliani.it/" }
+      ],
+      "updated": "2026-05-17"
+    },
+    {
+      "id": "siel-eolie",
+      "kind": "project",
+      "name": "Siel Eolie",
+      "blurb": "Bilingual company site, built without a framework",
+      "summary": "The bilingual site of the electrical firm I work for: its services, certifications and past work. No framework, just HTML, CSS and a little JavaScript, built to load fast.",
+      "status": "live",
+      "stack": ["HTML", "CSS", "JavaScript"],
+      "links": [
+        { "label": "sieleolie.com", "href": "https://www.sieleolie.com/" }
+      ],
+      "updated": "2026-04-23"
+    },
+    {
+      "id": "eolietech",
+      "kind": "project",
+      "name": "Eolietech",
+      "blurb": "Free file tools that run in your browser",
+      "summary": "Free tools for images, PDFs and audio that run in your browser, so your files never leave your device. The page’s security policy stops it sending them anywhere, and the site shows how to check that yourself. No ads, no accounts.",
+      "status": "live",
+      "license": "AGPL-3.0",
+      "stack": ["Astro", "TypeScript", "WebAssembly", "Cloudflare Workers"],
+      "links": [
+        { "label": "eolietech.com", "href": "https://eolietech.com/" },
+        { "label": "Source on GitHub", "href": "https://github.com/candygoogy/eolietech" }
+      ],
+      "updated": "2026-10-18"
+    },
+    {
+      "id": "experiments",
+      "kind": "experiments",
+      "name": "Experiments",
+      "summary": "Small tools that run in your browser.",
+      "links": [],
+      "page": "/experiments",
+      "children": [
+        { "id": "battery", "name": "Battery check", "href": "https://battery.candygoogy.dev/" },
+        { "id": "compose", "name": "Compose map", "href": "https://compose.candygoogy.dev/" },
+        { "id": "keyboard", "name": "Keyboard check", "href": "https://keyboard.candygoogy.dev/" },
+        { "id": "logscope", "name": "logscope", "href": "https://logscope.candygoogy.dev/" },
+        { "id": "mail", "name": "Mail check", "href": "https://mail.candygoogy.dev/" },
+        { "id": "photo", "name": "Photo check", "href": "https://photo.candygoogy.dev/" },
+        { "id": "subnet", "name": "Subnet planner", "href": "https://subnet.candygoogy.dev/" }
+      ]
+    },
+    {
+      "id": "homelab",
+      "kind": "homelab",
+      "name": "Homelab",
+      "summary": "The network I run at home, and the machines I work on.",
+      "links": [],
+      "page": "/uses#homelab",
+      "devices": [
+        { "id": "internet", "label": "Internet", "product": "5G" },
+        { "id": "router", "label": "Router", "product": "MikroTik Chateau 5G R17 ax", "parent": "internet" },
+        { "id": "switch", "label": "Switch", "product": "Ubiquiti UniFi Pro XG 8 PoE", "parent": "router" },
+        { "id": "ap", "label": "Access point", "product": "Ubiquiti UniFi U7 Pro Wall", "parent": "switch", "detail": "Wi-Fi 7" },
+        { "id": "laptop", "label": "Laptop", "product": "ASUS Zenbook 14", "parent": "ap" },
+        { "id": "crowd", "label": "Everything else", "product": "Whatever asks for the password", "parent": "ap" },
+        { "id": "server", "label": "Server", "product": "Lenovo V15", "parent": "switch", "detail": "Runs candygoogy-bot" },
+        { "id": "desktop", "label": "Desktop", "product": "Ryzen 7 9800X3D, RX 6900 XT", "parent": "switch" }
+      ]
+    },
+    {
+      "id": "colophon",
+      "kind": "colophon",
+      "name": "Colophon",
+      "summary": "How this site is made, for anyone who wonders.",
+      "links": [],
+      "page": "/colophon"
+    },
+    {
+      "id": "exit",
+      "kind": "exit",
+      "name": "Exit",
+      "links": [],
+      "page": "/"
+    }
+  ]
+}

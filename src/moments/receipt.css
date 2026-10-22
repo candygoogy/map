@@ -1,0 +1,82 @@
+/* The trip receipt's panel bits (Task 16): exit's "Leave", the receipt's sections and its
+   actions. A lazy chunk's own CSS, loaded with the receipt moment. */
+
+.receipt-leave {
+  margin-top: var(--sp-5);
+}
+
+/* A quiet button, the panel's link size, 44px tall for a finger. */
+.receipt-action {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 var(--sp-4);
+  font: inherit;
+  font-size: var(--fs-meta);
+  font-weight: var(--fw-medium);
+  color: var(--ink);
+  background: transparent;
+  border: var(--rule) solid var(--edge);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.receipt-action:hover {
+  border-color: var(--ink);
+}
+
+.receipt-action:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+
+/* Section names in spaced capitals, as the printed receipt has them. */
+.receipt-section {
+  margin: var(--sp-5) 0 var(--sp-2);
+  font-size: var(--fs-meta);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+.receipt-route {
+  margin: 0;
+  font-size: var(--fs-meta);
+  text-wrap: pretty;
+}
+
+.receipt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-4) var(--sp-5);
+  margin-top: var(--sp-4);
+}
+
+.receipt-status {
+  margin: var(--sp-3) 0 0;
+  font-size: var(--fs-meta);
+  color: var(--soft);
+}
+
+.receipt-status:empty {
+  display: none;
+}
+
+/* No trip left yet: the receipt's section isn't there at all (.station would show it). */
+section.receipt[hidden] {
+  display: none;
+}
+
+/* At #receipt the map's labels step back, hidden from the eye only (as a phone's quiet
+   overview has them): the camera faces the paper square on, and a name behind Fettle would sit
+   on the print. Still in the Tab order; a focused or hovered one shows, and none takes a tap
+   meant for the paper. */
+html[data-receipt] .labels li:not(:focus-within, .is-hover) .label {
+  opacity: 0;
+  transition: opacity var(--label-hide, 140ms) var(--label-ease, ease);
+}
+
+html[data-receipt] .labels li:not(:focus-within) .label::after {
+  pointer-events: none;
+}

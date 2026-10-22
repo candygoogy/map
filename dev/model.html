@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Model · map (dev)</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+      #view {
+        position: fixed;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .bar {
+        position: fixed;
+        left: 16px;
+        bottom: 16px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 16px;
+        max-width: calc(100% - 32px);
+        padding: 6px 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: color-mix(in oklab, var(--bg) 88%, transparent);
+        font-size: 13px;
+        line-height: 1.2;
+        color: var(--soft);
+      }
+      .bar [role="group"] {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+      .bar .label {
+        margin-right: 4px;
+      }
+      .bar .id {
+        font-weight: 700;
+        color: var(--ink);
+      }
+      .bar button {
+        min-height: 28px;
+        padding: 0 10px;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--soft);
+        font: inherit;
+        cursor: pointer;
+      }
+      .bar button:hover {
+        color: var(--ink);
+      }
+      .bar button[aria-pressed="true"] {
+        background: var(--line);
+        color: var(--ink);
+      }
+      .bar button:focus-visible {
+        outline-offset: 1px;
+      }
+      .bar output {
+        color: var(--ink);
+        font-variant-numeric: tabular-nums;
+      }
+      .bar .error {
+        color: var(--ink);
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="view" role="img" aria-label="The model"></canvas>
+    <div class="bar">
+      <span class="id" id="model-id"></span>
+      <div role="group" aria-labelledby="clips-label" id="clips">
+        <span class="label" id="clips-label">Play</span>
+      </div>
+      <div role="group" aria-labelledby="theme-label">
+        <span class="label" id="theme-label">Theme</span>
+        <button type="button" data-theme="light" aria-pressed="false">Light</button>
+        <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+      </div>
+      <div role="group" aria-labelledby="camera-label">
+        <span class="label" id="camera-label">Camera</span>
+        <button type="button" data-camera="close" aria-pressed="false">Close</button>
+        <button type="button" data-camera="overview" aria-pressed="false">Overview</button>
+      </div>
+      <span>Now <output id="playing">loading</output></span>
+    </div>
+    <script type="module" src="./model.ts"></script>
+  </body>
+</html>
