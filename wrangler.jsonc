@@ -13,10 +13,10 @@
     // as the map.
     "not_found_handling": "404-page",
   },
-  // No routes yet: the map.candygoogy.dev Custom Domain is added in Task 21
-  // ([{ "pattern": "map.candygoogy.dev", "custom_domain": true }]). Until then the first
-  // deploy is checked on its workers.dev address (Task 20); Task 21 turns that off, as the
-  // main site has it.
+  // The map.candygoogy.dev Custom Domain. Cloudflare creates its DNS record and certificate on
+  // deploy, so no record for the name may exist beforehand. The workers.dev address stays on
+  // until the Custom Domain answers, then goes off, as the main site has it.
+  "routes": [{ "pattern": "map.candygoogy.dev", "custom_domain": true }],
   "workers_dev": true,
   "preview_urls": false,
 }
