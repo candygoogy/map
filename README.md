@@ -28,7 +28,7 @@ All of it is drawn in the browser with WebGL, but every stop is also in the HTML
 - **Sound:** every sound is made in code with Web Audio, shaped on the real thing (a rubber stamp, a receipt printer, a breaker). Nothing is recorded or downloaded. [`sounds/SOURCES.md`](sounds/SOURCES.md) lists each one and where it plays.
 - **Hosting:** Cloudflare Workers static assets, with no Worker script. `public/_headers` sets a strict Content-Security-Policy (no inline script or style) and keeps the map out of search results; a path that isn't a file gets the map's own 404 page.
 - **Deploys:** Workers Builds, from this repo's `deploy` branch. CI moves `deploy` up to `main` only once every check on it has passed.
-- **Checks:** the type check, the unit tests and the browser tests, on every push, in [CI](.github/workflows/ci.yml). The browser tests run against the dev server, and against the built site under `wrangler dev`, as Cloudflare serves it.
+- **Checks:** the type check, the unit tests, the build and the built site under `wrangler dev`, as Cloudflare serves it, on every push in [CI](.github/workflows/ci.yml), with the browser tests of the pages that need no GPU. The 3D browser tests need a real GPU, so they run on a machine with one before each push.
 
 ```text
 src/

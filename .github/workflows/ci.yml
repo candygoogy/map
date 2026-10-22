@@ -53,9 +53,11 @@ jobs:
         run: npx playwright install --with-deps chromium
       - if: steps.browsers.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
-      # The map on the Vite dev server (playwright.config.ts starts it). Two workers: the
-      # full parallel run timed out loading the models.
-      - run: npx playwright test --project=chromium --workers=2
+      # The map on the Vite dev server (playwright.config.ts starts it): the pages that need no
+      # GPU only. A hosted runner has none, and in software WebGL the 3D tests run past every
+      # timeout (the first run here: 35 s a test, cancelled at 30 min), so the full chromium
+      # project is run on a machine with a GPU before each push.
+      - run: npx playwright test --project=chromium --workers=2 tests/e2e/fallback.spec.ts tests/e2e/no-webgl.spec.ts tests/e2e/facts.spec.ts
       - run: npm run build
       # The build as the Worker serves it: wrangler.jsonc and public/_headers under
       # `wrangler dev` (local only, no Cloudflare account), checked by tests/e2e/worker.spec.ts.
