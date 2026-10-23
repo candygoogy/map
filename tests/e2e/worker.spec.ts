@@ -60,6 +60,19 @@ test('/ returns 200 with X-Robots-Tag: noindex and the CSP header', async ({ req
   expect(headers['cache-control']).toBe('public, max-age=0, must-revalidate');
 });
 
+test('/ carries the link preview, as candygoogy.dev’s inner pages, and its card is served', async ({ request }) => {
+  const html = await (await request.get('/')).text();
+  const meta = (key: string) => new RegExp(`<meta (?:property|name)="${key}" content="([^"]*)"`).exec(html)?.[1];
+  expect(meta('og:title')).toBe('Map – candygoogy');
+  expect(meta('og:description')).toBe(meta('description'));
+  expect(meta('og:url')).toBe('https://map.candygoogy.dev/');
+  expect(meta('og:image')).toBe('https://map.candygoogy.dev/og.png');
+  expect(meta('twitter:card')).toBe('summary_large_image');
+  const card = await request.get('/og.png');
+  expect(card.status()).toBe(200);
+  expect(card.headers()['content-type']).toBe('image/png');
+});
+
 test('/models/fettle.glb is served with a long cache', async ({ request }) => {
   const res = await request.get('/models/fettle.glb');
   expect(res.status()).toBe(200);
