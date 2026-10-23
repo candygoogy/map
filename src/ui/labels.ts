@@ -75,7 +75,13 @@
 //   (NAMED, the phone pass's labels (a)) show their names there (data-named), with no status
 //   line, each only where its name and LEAST band lie on no other model or name on show, within
 //   NEAR px of its own model and nearer it than any other's: turned, panned or zoomed, one that
-//   can't is hidden like the rest.
+//   can't is hidden like the rest. While the camera flies to a station, that station's own label
+//   (the current one) keeps out of sight too (data-veil), the same way, from the eye only: its
+//   side is picked afresh every frame in flight, and as the camera swept, the nearest of its
+//   sides changed every few frames, so its name jumped round its model all the way there
+//   (Switch's, under, left, up-left, left, on the owner's iPhone, 2026-10-23). As the camera
+//   lands it's placed once, at the side it rests on, and fades in there. Focused from the
+//   keyboard, it stays shown.
 // - The homelab cluster's sub-nodes (Task 13 Batch B): their five labels
 //   would crowd the fan, so in the overview, on every screen, each keeps quiet the same way
 //   (data-quiet on its own item) and takes no room, until focused, hovered or current. At a
@@ -170,6 +176,9 @@ interface Label {
   /** The current station's, its side taken off the docked gondola once the camera had come to
    *  rest: kept while it stays usable (keeps()), not picked afresh. */
   hold: boolean;
+  /** The current station's on a phone's quiet layout while the camera flies: out of sight
+   *  (data-veil) until it lands. */
+  veil: boolean;
 }
 
 export function createLabels(
@@ -224,7 +233,7 @@ export function createLabels(
     button.append(name, status);
     item.append(button);
     list.append(item);
-    const label: Label = { id, item, button, status, width: 0, height: 0, x: NaN, y: NaN, off: null, nohit: null, named: null, cut: '', side: 0, shown: false, box: null, hold: false };
+    const label: Label = { id, item, button, status, width: 0, height: 0, x: NaN, y: NaN, off: null, nohit: null, named: null, cut: '', side: 0, shown: false, box: null, hold: false, veil: false };
     labels.push(label);
     byId.set(id, label);
 
@@ -447,7 +456,8 @@ export function createLabels(
 
   /** `fresh`: in flight, or just landed, or the view's size or the panel's inset moved: the
    *  current label's side off the gondola is picked afresh, not held, and on a phone the current
-   *  label's side too. `flying`: in flight, where the side it has counts STICK px nearer. */
+   *  label's side too. `flying`: in flight, where the side it has counts STICK px nearer, and
+   *  a phone's current label is veiled. */
   function place(fresh: boolean, flying = false): void {
     const { camera } = stage;
     const { width, height } = stage.viewport;
@@ -750,7 +760,9 @@ export function createLabels(
         // only the labels on show take, from before the layout turned quiet.) The current
         // station's is picked afresh in flight and as it lands, like the labels that are on: one
         // picked early in flight was kept while it stayed clear, so the landing never put it
-        // back beside its model (ap's, desktop's, switch's, over them in empty space).
+        // back beside its model (ap's, desktop's, switch's, over them in empty space). Picked
+        // afresh, it flipped sides every few frames as the camera swept, so in flight it's
+        // veiled (below) and only the side it lands on is ever seen.
         let clear: number[] = [];
         for (const group of [[0, 6, 7, 8, 1, 2, 3], [4, 5], [13, 14, 15, 16]]) {
           const pick = (strict: boolean) => group.filter((s) => fits(s, strict));
@@ -802,6 +814,15 @@ export function createLabels(
       if (outside !== l.off) {
         l.off = outside;
         l.item.toggleAttribute('data-off', outside);
+      }
+      // On a phone's quiet layout the current station's name keeps out of sight while the camera
+      // flies (styles.css: data-veil, from the eye only, still in the Tab order and the
+      // accessibility tree, still taking its tap), and comes back in the same frame as its place
+      // as the camera lands, so it fades in where it rests, never at a side from the flight.
+      const veil = q && current && flying;
+      if (veil !== l.veil) {
+        l.veil = veil;
+        l.item.toggleAttribute('data-veil', veil);
       }
       // The named six on a phone: each shown only where its name, with its LEAST band about its
       // middle, lies on no other model's box nor another name on show (turned side-on, Dolci
@@ -929,7 +950,9 @@ export function createLabels(
       if (!measured) measure();
       const flying = flights?.flight != null;
       const moved = snapshot();
-      if (moved || dirty) {
+      // A label veiled in flight is placed as the camera lands, moved this step or not: else it
+      // could keep its veil at rest.
+      if (moved || dirty || (flew && !flying && labels.some((l) => l.veil))) {
         dirty = false;
         place(flying || flew || !framed, flying);
       }

@@ -696,4 +696,45 @@ test.describe('on a phone, by touch, at a station', () => {
       }
     }
   });
+
+  test("in flight the destination's label is out of sight, and it fades in where it lands and stays", async ({ page }) => {
+    // The owner's iPhone, 2026-10-23: flying from the overview to Switch, its name jumped round
+    // its model (under, left, up-left, left) every few frames until the camera landed. Each step
+    // waits a real frame, so the label's fades run as they would.
+    await open(page);
+    const { flight, rest } = await page.evaluate(async () => {
+      const { stations, director, advance } = window.__map!;
+      const li = document.querySelector('.labels li:has(button.label[data-go="switch"])')!;
+      const button = li.querySelector('button')!;
+      const frame = () => new Promise((r) => requestAnimationFrame(r));
+      const sample = () => {
+        const r = button.getBoundingClientRect();
+        return { veil: li.hasAttribute('data-veil'), opacity: +getComputedStyle(button).opacity, at: [r.left, r.top] };
+      };
+      stations.go('switch');
+      const flight = [];
+      for (let k = 0; k < 600 && director.flight; k++) {
+        advance(1 / 60);
+        await frame();
+        if (director.flight) flight.push(sample());
+      }
+      const rest = [];
+      for (const end = performance.now() + 500; performance.now() < end; ) {
+        advance(1 / 60);
+        await frame();
+        rest.push(sample());
+      }
+      return { flight, rest };
+    });
+    expect(flight.length, 'the flight takes frames').toBeGreaterThan(30);
+    for (const [k, s] of flight.entries()) {
+      expect(s.veil, `frame ${k} in flight: veiled`).toBe(true);
+      expect(s.opacity, `frame ${k} in flight: out of sight`).toBeLessThan(0.01);
+    }
+    expect(rest.every((s) => !s.veil), 'unveiled once it lands').toBe(true);
+    expect(rest.at(-1)!.opacity, 'fading in, or in').toBeGreaterThan(0.5);
+    await expect.poll(() => opacity(page, 'switch'), 'shown after the fade').toBe('1');
+    const moved = rest.filter((s) => s.at.some((v, j) => Math.abs(v - rest[0]!.at[j]!) > 0.5));
+    expect(moved, `held at ${rest[0]!.at.map(Math.round)} from landing on`).toEqual([]);
+  });
 });

@@ -1620,6 +1620,17 @@ html.theme-vt::view-transition-new(root) {
   transition-duration: var(--label-show, 220ms);
 }
 
+/* On a phone the current station's name keeps out of sight while the
+   camera flies there (labels.ts: data-veil): its side, picked afresh every
+   frame, flipped round its model all the way there. Gone over the edge
+   fade (a named one, shown as the flight sets off); back as it lands, in
+   its place at rest, as the panel's text swaps in (the rule above). From
+   the eye only, as data-quiet; focused from the keyboard, it shows. */
+.stations-nav[data-quiet] li[data-veil] .label[aria-current]:not(:focus-visible) {
+  opacity: 0;
+  transition-duration: var(--label-fade, 120ms);
+}
+
 /* The stray signal's button (Task 17, src/moments/duck.ts): a 44px round
    target over the signal while it rides, drawn as nothing but the signal
    itself; a focus ring for the keyboard. Off the canvas it lets the
