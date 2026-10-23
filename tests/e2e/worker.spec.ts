@@ -190,7 +190,7 @@ test('the 404 page: its heading, the way back, the route check run through, and 
   );
   await expect(foot.getByRole('link', { name: /^commit [0-9a-f]{7}/ })).toHaveAttribute(
     'href',
-    /^https:\/\/github\.com\/candygoogy\/map\/commit\/[0-9a-f]{40}$/,
+    /^https:\/\/github\.com\/candygoogy\/map\.candygoogy\.dev\/commit\/[0-9a-f]{40}$/,
   );
   await expect(foot.getByRole('link', { name: copy.nfFootSource.text })).toHaveAttribute('href', 'https://github.com/candygoogy/map.candygoogy.dev');
   await expect(foot.locator('.nf-stamp')).toBeVisible();
