@@ -155,7 +155,7 @@ describe('renderNotFound', () => {
     expect(door).toMatch(/^<a class="nf-node" href="https:\/\/candygoogy\.dev\/">/);
     expect(door).toContain(`<span class="nf-sr">${copy.nfOpensSite.text}</span>`);
     expect(door.endsWith('</a>')).toBe(true);
-    expect(copy.nfOpensSite.approved).toBe(false); // the map's own words, for the owner
+    expect(copy.nfOpensSite.approved).toBe(true); // the map's own words, approved by the owner (2026-10-23)
   });
 
   // The owner's footer for the 404 (2026-10-22 evening): the three notes, then the three links,

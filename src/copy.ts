@@ -132,46 +132,46 @@ export const pageCopy: Record<PageCopyKey, { text: string; approved: boolean }> 
   // The welcome's boxes (Version A of their words, 2026-10-22; for the owner to
   // approve as they try it). One set of controls shows: the mouse set under (hover: hover) and
   // (pointer: fine), the touch set otherwise (styles.css). Each row a label and its value.
-  welcomeAroundHeading: { text: 'Getting around', approved: false },
-  welcomeVisitLabel: { text: 'Visit a stop', approved: false },
-  welcomeVisitMouse: { text: 'click a model, or ‹ ›', approved: false },
-  welcomeVisitTouch: { text: 'tap a model, or ‹ ›', approved: false },
-  welcomeMoveLabel: { text: 'Move the map', approved: false },
-  welcomeMoveMouse: { text: 'drag the floor', approved: false },
-  welcomeMoveTouch: { text: 'drag the floor', approved: false },
-  welcomeTurnLabel: { text: 'Turn it', approved: false },
-  welcomeTurnMouse: { text: 'right-drag or Shift-drag', approved: false },
-  welcomeTurnTouch: { text: 'twist two fingers', approved: false },
-  welcomeZoomLabel: { text: 'Zoom', approved: false },
-  welcomeZoomMouse: { text: 'scroll', approved: false },
-  welcomeZoomTouch: { text: 'pinch', approved: false },
-  welcomePullLabel: { text: 'Pull a model', approved: false },
-  welcomePullMouse: { text: 'drag it', approved: false },
-  welcomePullTouch: { text: 'hold it, then drag', approved: false },
+  welcomeAroundHeading: { text: 'Getting around', approved: true },
+  welcomeVisitLabel: { text: 'Visit a stop', approved: true },
+  welcomeVisitMouse: { text: 'click a model, or ‹ ›', approved: true },
+  welcomeVisitTouch: { text: 'tap a model, or ‹ ›', approved: true },
+  welcomeMoveLabel: { text: 'Move the map', approved: true },
+  welcomeMoveMouse: { text: 'drag the floor', approved: true },
+  welcomeMoveTouch: { text: 'drag the floor', approved: true },
+  welcomeTurnLabel: { text: 'Turn it', approved: true },
+  welcomeTurnMouse: { text: 'right-drag or Shift-drag', approved: true },
+  welcomeTurnTouch: { text: 'twist two fingers', approved: true },
+  welcomeZoomLabel: { text: 'Zoom', approved: true },
+  welcomeZoomMouse: { text: 'scroll', approved: true },
+  welcomeZoomTouch: { text: 'pinch', approved: true },
+  welcomePullLabel: { text: 'Pull a model', approved: true },
+  welcomePullMouse: { text: 'drag it', approved: true },
+  welcomePullTouch: { text: 'hold it, then drag', approved: true },
   // The mouse set's last row; the touch set has Back instead.
-  welcomeBackLabel: { text: 'Back to this view', approved: false },
-  welcomeBackMouse: { text: 'Esc', approved: false },
-  welcomeRetraceLabel: { text: 'Retrace your steps', approved: false },
-  welcomeRetraceTouch: { text: 'Back', approved: false },
+  welcomeBackLabel: { text: 'Back to this view', approved: true },
+  welcomeBackMouse: { text: 'Esc', approved: true },
+  welcomeRetraceLabel: { text: 'Retrace your steps', approved: true },
+  welcomeRetraceTouch: { text: 'Back', approved: true },
   // {stops}, {projects}, {tools} and {machines} are counted from the feed at prerender
   // (src/fallback/html.ts, after the homelab cluster's devices join it), never written here.
-  welcomeOnItHeading: { text: 'What’s on it', approved: false },
+  welcomeOnItHeading: { text: 'What’s on it', approved: true },
   welcomeOnIt: {
     text: '{stops} stops, from candygoogy.dev to the exit: {projects} projects, {tools} small tools under Experiments, the homelab and {machines} of its machines, and the colophon.',
-    approved: false,
+    approved: true,
   },
-  welcomeOnItWired: { text: 'The homelab is wired the way it is at home.', approved: false },
-  welcomeKnowHeading: { text: 'Good to know', approved: false },
-  welcomeSound: { text: 'Sound is off. The speaker up top turns it on.', approved: false },
-  welcomePokeMouse: { text: 'At a stop, click its model to poke it.', approved: false },
-  welcomePokeTouch: { text: 'At a stop, tap its model to poke it.', approved: false },
-  welcomeReceipt: { text: 'Leave by Exit’s door. Fettle prints a receipt.', approved: false },
+  welcomeOnItWired: { text: 'The homelab is wired the way it is at home.', approved: true },
+  welcomeKnowHeading: { text: 'Good to know', approved: true },
+  welcomeSound: { text: 'Sound is off. The speaker up top turns it on.', approved: true },
+  welcomePokeMouse: { text: 'At a stop, click its model to poke it.', approved: true },
+  welcomePokeTouch: { text: 'At a stop, tap its model to poke it.', approved: true },
+  welcomeReceipt: { text: 'Leave by Exit’s door. Fettle prints a receipt.', approved: true },
   // “A few things are hidden.” is the retired welcomeBody's approved sentence; the second is new.
-  welcomeHidden: { text: 'A few things are hidden. None of them are bugs.', approved: false },
-  welcomeHint: { text: 'Try things twice, and watch the traffic.', approved: false },
+  welcomeHidden: { text: 'A few things are hidden. None of them are bugs.', approved: true },
+  welcomeHint: { text: 'Try things twice, and watch the traffic.', approved: true },
   // The counter's label. Its value and its screen-reader text are in src/copy-secrets.ts, as the
   // secrets' chunk keeps them current (the prerender writes 0).
-  welcomeFoundLabel: { text: 'Found so far', approved: false },
+  welcomeFoundLabel: { text: 'Found so far', approved: true },
   // The phone's peek sheet in the overview: the welcome's short form, beside ‹ ›. One sentence a
   // line: the hint has 216px beside ‹ › at 360px wide, 246px at 390. The rotation draft's approved
   // “Drag it to pull, or drag the floor to turn.” is 266px, so it broke onto a third line; this
@@ -221,7 +221,7 @@ export const pageCopy: Record<PageCopyKey, { text: string; approved: boolean }> 
   nfEggReply: { text: 'Tried it. Still a 404.', approved: true },
   // New, the map's own: the route check's second hop is a door back to the site, as the site's is
   // the door to the map (its hidden ". Opens the map"); read after "candygoogy.dev, Working".
-  nfOpensSite: { text: '. Opens the site', approved: false },
+  nfOpensSite: { text: '. Opens the site', approved: true },
   nfFootOwner: { text: '© {year} candygoogy', approved: true },
   nfFootPrivacy: { text: 'No trackers, no cookies', approved: true },
   nfFootColophon: { text: 'Colophon', approved: true },

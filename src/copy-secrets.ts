@@ -48,8 +48,8 @@ export const secretsCopy: Record<SecretsCopyKey, { text: string; approved: boole
   // they're all found, as on the receipt (receiptSecretsCount); then {total} is every secret
   // there is. The …Sr words are the row's text for a screen reader, in place of the label and
   // the value. New words, for the owner.
-  welcomeFoundCount: { text: '{found} of a few', approved: false },
-  welcomeFoundSr: { text: 'Hidden things found: {found} of a few', approved: false },
-  welcomeFoundAll: { text: 'All {total}. That’s the lot.', approved: false },
-  welcomeFoundAllSr: { text: 'All {total} hidden things found.', approved: false },
+  welcomeFoundCount: { text: '{found} of a few', approved: true },
+  welcomeFoundSr: { text: 'Hidden things found: {found} of a few', approved: true },
+  welcomeFoundAll: { text: 'All {total}. That’s the lot.', approved: true },
+  welcomeFoundAllSr: { text: 'All {total} hidden things found.', approved: true },
 };
