@@ -98,7 +98,7 @@ function trace(feed: MapFeed, copy: Copy): string {
 }
 
 /** The map's source, which the footer's Source link and its build stamp's commit point into. */
-export const MAP_SOURCE = 'https://github.com/candygoogy/map';
+export const MAP_SOURCE = 'https://github.com/candygoogy/map.candygoogy.dev';
 
 /** The site's build stamp (Footer.astro): "Built <date> from <commit>", the date a <time>, the
  *  short commit linked to the full one and named "commit 1a2b3c4" (", with uncommitted changes"

@@ -70,12 +70,12 @@ describe('404.html, as built', () => {
 
   it('stamps the footer with the build’s date and commit at prerender, in no script', () => {
     expect(html).toMatch(
-      /<span class="nf-stamp">Built <time datetime="\d{4}-\d\d-\d\d">[A-Z][a-z]{2} \d{1,2}, \d{4}<\/time> from <a href="https:\/\/github\.com\/candygoogy\/map\/commit\/[0-9a-f]{40}" aria-label="commit [0-9a-f]{7}(-dirty, with uncommitted changes)?">[0-9a-f]{7}(-dirty)?<\/a><\/span>/,
+      /<span class="nf-stamp">Built <time datetime="\d{4}-\d\d-\d\d">[A-Z][a-z]{2} \d{1,2}, \d{4}<\/time> from <a href="https:\/\/github\.com\/candygoogy\/map\.candygoogy\.dev\/commit\/[0-9a-f]{40}" aria-label="commit [0-9a-f]{7}(-dirty, with uncommitted changes)?">[0-9a-f]{7}(-dirty)?<\/a><\/span>/,
     );
     for (const f of out.output) {
       if (f.fileName.endsWith('.js')) {
         const code = f.type === 'chunk' ? f.code : String(f.source);
-        expect(code, f.fileName).not.toContain('github.com/candygoogy/map');
+        expect(code, f.fileName).not.toContain('github.com/candygoogy/map.candygoogy.dev');
       }
     }
   });
@@ -168,7 +168,7 @@ describe('renderNotFound', () => {
     expect([...notes.matchAll(/<span( class="nf-stamp")?>([\s\S]*?)<\/span>/g)].map((m) => m[2])).toEqual([
       '© 2026 candygoogy',
       '<a href="https://candygoogy.dev/colophon#privacy">No trackers, no cookies</a>',
-      `Built <time datetime="2026-10-22">Oct 22, 2026</time> from <a href="https://github.com/candygoogy/map/commit/${SHA}" aria-label="commit 0123456">0123456</a>`,
+      `Built <time datetime="2026-10-22">Oct 22, 2026</time> from <a href="https://github.com/candygoogy/map.candygoogy.dev/commit/${SHA}" aria-label="commit 0123456">0123456</a>`,
     ]);
     expect(notes).toContain('<span class="nf-stamp">Built ');
     // After the notes, the links: nothing but them, no "·" separators.
@@ -176,9 +176,9 @@ describe('renderNotFound', () => {
     expect(links).toBe(
       '<a href="https://candygoogy.dev/colophon">Colophon</a>' +
         '<a href="https://candygoogy.dev/uses">Uses</a>' +
-        '<a href="https://github.com/candygoogy/map">Source</a>',
+        '<a href="https://github.com/candygoogy/map.candygoogy.dev">Source</a>',
     );
-    expect(MAP_SOURCE).toBe('https://github.com/candygoogy/map');
+    expect(MAP_SOURCE).toBe('https://github.com/candygoogy/map.candygoogy.dev');
     expect(foot).not.toContain('·');
     expect(foot).not.toContain('#top');
     expect(foot).not.toContain('Back to top');
@@ -187,7 +187,7 @@ describe('renderNotFound', () => {
   it('marks a build from a tree with uncommitted changes, as the site does', () => {
     const foot = footOf(renderNotFound(feed, copy, [], { ...built, dirty: true }, 2026));
     expect(foot).toContain(
-      `from <a href="https://github.com/candygoogy/map/commit/${SHA}" aria-label="commit 0123456-dirty, with uncommitted changes">0123456-dirty</a>`,
+      `from <a href="https://github.com/candygoogy/map.candygoogy.dev/commit/${SHA}" aria-label="commit 0123456-dirty, with uncommitted changes">0123456-dirty</a>`,
     );
   });
 

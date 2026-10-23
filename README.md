@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/candygoogy/map/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/candygoogy/map/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/candygoogy/map.candygoogy.dev/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/candygoogy/map.candygoogy.dev/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="Code: MIT" src="https://img.shields.io/badge/code-MIT-3651d4"></a>
   <img alt="Built with Three.js" src="https://img.shields.io/badge/built%20with-Three.js-3651d4">
 </p>

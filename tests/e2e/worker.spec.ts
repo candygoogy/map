@@ -192,7 +192,7 @@ test('the 404 page: its heading, the way back, the route check run through, and 
     'href',
     /^https:\/\/github\.com\/candygoogy\/map\/commit\/[0-9a-f]{40}$/,
   );
-  await expect(foot.getByRole('link', { name: copy.nfFootSource.text })).toHaveAttribute('href', 'https://github.com/candygoogy/map');
+  await expect(foot.getByRole('link', { name: copy.nfFootSource.text })).toHaveAttribute('href', 'https://github.com/candygoogy/map.candygoogy.dev');
   await expect(foot.locator('.nf-stamp')).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
   expect(problems).toEqual([]);
@@ -291,7 +291,8 @@ test('no CSP violations in the console during arrival and three flights', async 
     return { empty: node.bounds.isEmpty(), box: node.root.getObjectByName('box') !== undefined };
   });
   expect(fettle).toEqual({ empty: false, box: false });
-  expect(models).toEqual(expect.arrayContaining(['/models/world.glb', '/models/fettle.glb', '/models/visitor.glb']));
+  // Over a real network the gondola (visitor.glb) can come in after the nodes are ready.
+  await expect.poll(() => models, { timeout: 15_000 }).toEqual(expect.arrayContaining(['/models/world.glb', '/models/fettle.glb', '/models/visitor.glb']));
 
   // The arrival on the manual clock, then three flights.
   await page.evaluate(() => window.__map!.advance(3.5));
